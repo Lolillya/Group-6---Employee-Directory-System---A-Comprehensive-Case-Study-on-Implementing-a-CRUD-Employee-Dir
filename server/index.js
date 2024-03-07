@@ -5,7 +5,7 @@ const cors = require("cors");
 const app = express();
 
 //cors allows the server to use our app?
-app.use(cors());
+app.use(cors("*"));
 //in order the read the json object sent from app.js..
 app.use(express.json());
 
@@ -52,6 +52,39 @@ app.get("/employees", (req, res) => {
       return;
     } else {
       return res.json(result);
+    }
+  });
+});
+
+// update request for the employee data
+app.put("/update", (req, res) => {
+  const id = req.body.empID;
+  const firstName = req.body.firstName;
+  const lastName = req.body.lastName;
+  const age = req.body.age;
+  const dept = req.body.department;
+  const position = req.body.position;
+  db.query(
+    "UPDATE employees SET empID = ?, empFirstName = ?, empLastName = ?, empAge = ?, empDepartment = ?, empPosition = ? WHERE empID = ?;",
+    [id, firstName, lastName, age, dept, position, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        return res.send(result);
+      }
+    }
+  );
+});
+
+// delete request for the employee data
+app.delete("/delete/:employeeID", (req, res) => {
+  const empID = req.params.employeeID;
+  db.query("DELETE FROM employees WHERE empID = ?", empID, (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      return res.send(result);
     }
   });
 });

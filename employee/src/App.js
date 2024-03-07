@@ -1,14 +1,14 @@
 import "./App.css";
+import AddEmployeeModal from "./components/AddEmployeeModal/AddEmployeeModal";
 import MainContent from "./components/MainContent/MainContent";
-import Sidebar from "./components/sidebar/Sidebar";
+import Sidebar from "./components/Sidebar/Sidebar";
 
 function App() {
   return (
     <>
-      <main className=" w-max h-max">
-        <Sidebar />
-        <MainContent />
-      </main>
+      <Sidebar />
+      <MainContent />
+      {/* <AddEmployeeModal /> */}
     </>
   );
 }

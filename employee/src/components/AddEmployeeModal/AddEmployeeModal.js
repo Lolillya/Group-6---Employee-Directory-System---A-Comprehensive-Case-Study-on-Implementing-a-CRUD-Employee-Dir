@@ -2,10 +2,11 @@ import React, { useState } from "react";
 
 const AddEmployeeModal = (props) => {
   const [firstName, setFirstName] = useState("");
-  const [lastName, setlastName] = useState("");
-  const [age, setAge] = useState(0);
+  const [lastName, setLastName] = useState("");
+  const [age, setAge] = useState("");
   const [position, setPosition] = useState("");
   const [department, setDepartment] = useState("");
+  const [error, setError] = useState("");
 
   console.log(firstName);
 
@@ -19,9 +20,37 @@ const AddEmployeeModal = (props) => {
   //   });
   // };
 
-  const Submit = () => {
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (!validateInput()) return;
     props.submitForm(firstName, lastName, age, department, position);
     props.setWindowVisible();
+  };
+
+  const validateInput = () => {
+    const nameRegex = /^[a-zA-Z\s]{1,20}$/;
+    const departmentRegex = /^[a-zA-Z\s]{1,20}$/;
+    const positionRegex = /^[a-zA-Z\s]{1,20}$/;
+
+    if (
+      !nameRegex.test(firstName.trim()) ||
+      !nameRegex.test(lastName.trim()) ||
+      !positionRegex.test(position.trim()) ||
+      !departmentRegex.test(department.trim())
+    ) {
+      setError(
+        "Please enter valid information without special characters and within 20 characters."
+      );
+      return false;
+    }
+
+    if (age === "" || isNaN(age) || parseInt(age) < 18) {
+      setError("Age must be a number and should be 18 or above.");
+      return false;
+    }
+
+    setError("");
+    return true;
   };
 
   return (
@@ -34,7 +63,7 @@ const AddEmployeeModal = (props) => {
           >
             Close
           </button>
-          <form className=" text-white" onSubmit={Submit}>
+          <form className="text-white" onSubmit={handleSubmit}>
             <div className="flex flex-col">
               <label htmlFor="firstName">Firstname</label>
               <input
@@ -42,6 +71,8 @@ const AddEmployeeModal = (props) => {
                 className="p-2 text-black"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                pattern="[a-zA-Z\s]{1,20}"
+                required
               />
             </div>
             <div className="flex flex-col">
@@ -50,7 +81,9 @@ const AddEmployeeModal = (props) => {
                 id="lastName"
                 className="p-2 text-black"
                 value={lastName}
-                onChange={(e) => setlastName(e.target.value)}
+                onChange={(e) => setLastName(e.target.value)}
+                pattern="[a-zA-Z\s]{1,20}"
+                required
               />
             </div>
             <div className="flex flex-col">
@@ -58,8 +91,11 @@ const AddEmployeeModal = (props) => {
               <input
                 id="age"
                 className="p-2 text-black"
+                type="number"
+                min="18"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
+                required
               />
             </div>
             <div className="flex flex-col">
@@ -69,16 +105,36 @@ const AddEmployeeModal = (props) => {
                 className="p-2 text-black"
                 value={position}
                 onChange={(e) => setPosition(e.target.value)}
+                pattern="[a-zA-Z\s]{1,20}"
+                required
               />
             </div>
-            <div className="flex flex-col">
+            {/* <div className="flex flex-col">
               <label htmlFor="department">Department</label>
               <input
                 id="department"
                 className="p-2 text-black"
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
+                pattern="[a-zA-Z\s]{1,20}"
+                required
               />
+            </div> */}
+
+            <div className="flex flex-col">
+              <label>Department</label>
+              <select
+                className="p-2 text-black"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+              >
+                <option disabled value={""}>
+                  Select Department
+                </option>
+                <option value={"CCIS"}>CCIS</option>
+                <option value={"CAS"}>CAS</option>
+                <option value={"CEA"}>CEA</option>
+              </select>
             </div>
 
             <div>
@@ -86,6 +142,7 @@ const AddEmployeeModal = (props) => {
                 Submit
               </button>
             </div>
+            {error && <p className="text-red-500">{error}</p>}
           </form>
         </div>
       </section>

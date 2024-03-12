@@ -3,18 +3,8 @@ import Axios from "axios";
 import AddEmployeeModal from "../AddEmployeeModal/AddEmployeeModal";
 
 const MainContent = () => {
-  // Form states
-  // Assigns input values to state
-  // const [firstName, setFirstName] = useState("");
-  // const [lastName, setLastname] = useState("");
-  // const [age, setAge] = useState(0);
-  // const [dept, setDept] = useState("");
-  // const [position, setPosition] = useState("");
   const [editRowIndex, setEditRowIndex] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // db State
-  // Takes data from database
   const [data, setData] = useState([]);
 
   const setWindowVisible = () => {
@@ -36,11 +26,9 @@ const MainContent = () => {
   const getEmployees = () => {
     Axios.get("http://localhost:3001/employees").then((res) => {
       setData(res.data);
-      console.log(res);
     });
   };
 
-  //puraims
   const handleEditClick = (index) => {
     setEditRowIndex(index);
   };
@@ -61,6 +49,25 @@ const MainContent = () => {
     empPosition,
     empDepartment
   ) => {
+    const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+    const nameRegex = /^[a-zA-Z]+(?:\s+[a-zA-Z]+)?$/;
+    if (
+      !empAge ||
+      isNaN(empAge) ||
+      empAge < 18 ||
+      specialCharsRegex.test(empFirstName) ||
+      specialCharsRegex.test(empLastName) ||
+      specialCharsRegex.test(empPosition) ||
+      specialCharsRegex.test(empDepartment) ||
+      !nameRegex.test(empFirstName.trim()) ||
+      !nameRegex.test(empLastName.trim()) ||
+      !nameRegex.test(empPosition.trim())
+    ) {
+      alert(
+        "Please provide valid inputs without special characters and in the format 'Name Name'."
+      );
+      return;
+    }
     setEditRowIndex(null);
     Axios.put("http://localhost:3001/update", {
       empID: empID,
@@ -75,10 +82,11 @@ const MainContent = () => {
   };
 
   const deleteEmployee = (employeeID) => {
-    console.log(employeeID);
-    Axios.delete("http://localhost:3001/delete/" + employeeID).then(() => {
-      getEmployees();
-    });
+    if (window.confirm("Are you sure you want to delete this employee?")) {
+      Axios.delete("http://localhost:3001/delete/" + employeeID).then(() => {
+        getEmployees();
+      });
+    }
   };
 
   useEffect(() => {
@@ -123,20 +131,7 @@ const MainContent = () => {
             <tbody>
               {data.map((d, i) => (
                 <tr key={i} className=" border-b-2">
-                  <td>
-                    {editRowIndex === i ? (
-                      <input
-                        className=""
-                        type="text"
-                        value={d.empID}
-                        onChange={(e) =>
-                          handleCellEdit({ empID: e.target.value }, i)
-                        }
-                      />
-                    ) : (
-                      d.empID
-                    )}
-                  </td>
+                  <td>{d.empID}</td>
                   <td>
                     {editRowIndex === i ? (
                       <input
@@ -195,14 +190,31 @@ const MainContent = () => {
                   </td>
                   <td>
                     {editRowIndex === i ? (
-                      <input
-                        className=""
-                        type="text"
-                        value={d.empDepartment}
-                        onChange={(e) =>
-                          handleCellEdit({ empDepartment: e.target.value }, i)
-                        }
-                      />
+                      // <input
+                      //   className=""
+                      //   type="text"
+                      //   value={d.empDepartment}
+                      //   onChange={(e) =>
+                      //     handleCellEdit({ empDepartment: e.target.value }, i)
+                      //   }
+                      // />
+
+                      <div className="flex flex-col">
+                        <select
+                          className="p-2 text-black"
+                          value={d.empDepartment}
+                          onChange={(e) =>
+                            handleCellEdit({ empDepartment: e.target.value }, i)
+                          }
+                        >
+                          <option disabled value={""}>
+                            Select Department
+                          </option>
+                          <option value={"CCIS"}>CCIS</option>
+                          <option value={"CAS"}>CAS</option>
+                          <option value={"CEA"}>CEA</option>
+                        </select>
+                      </div>
                     ) : (
                       d.empDepartment
                     )}
@@ -236,9 +248,7 @@ const MainContent = () => {
                   <td>
                     <button
                       className="deleteBtn p-2 border rounded-xl bg-blue-600 text-white"
-                      onClick={() => {
-                        deleteEmployee(d.empID);
-                      }}
+                      onClick={() => deleteEmployee(d.empID)}
                     >
                       Delete
                     </button>
